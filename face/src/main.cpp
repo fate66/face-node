@@ -10,6 +10,8 @@
 #include "TLive.h"
 #include "TBlur.h"
 #include <napi.h>
+#include "opencv2/freetype.hpp"
+
 //----------------------------------------------------------------------------------------
 //
 // Created by markson zhang
@@ -125,7 +127,8 @@ void DrawObjects(cv::Mat &frame, vector<FaceObject> &Faces, Napi::Function &cb, 
         switch (obj.NameIndex)
         {
         case -1:
-            Str = "Stranger";
+            // Str = "Stranger";
+            Str = "陌生人";
             break;
         case -2:
             Str = "too tiny";
@@ -147,7 +150,16 @@ void DrawObjects(cv::Mat &frame, vector<FaceObject> &Faces, Napi::Function &cb, 
             x = frame.cols - label_size.width;
 
         cv::rectangle(frame, cv::Rect(cv::Point(x, y), cv::Size(label_size.width, label_size.height + baseLine)), color, -1);
-        cv::putText(frame, Str, cv::Point(x, y + label_size.height + 2), cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0, 0, 0));
+        // cv::putText(frame, Str, cv::Point(x, y + label_size.height + 2), cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0, 0, 0));
+        /**
+         *  解决中文乱码的问题
+         * https://blog.csdn.net/buyanxi/article/details/115538374
+         * https://github.com/buyanxi/MyLearning/tree/master/putTextChinese
+         */
+        cv::Ptr<cv::freetype::FreeType2> ft2 = cv::freetype::createFreeType2();
+        ft2->loadFontData("/usr/share/fonts/simsun.ttc", 0);
+        ft2->putText(frame, Str, cv::Point(x, y + label_size.height + 2), 20, cv::Scalar(0, 0, 0), 1, 8, true);
+
 #endif // RECOGNIZE_FACE
     }
 }
